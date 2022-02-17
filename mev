@@ -16,7 +16,9 @@ function db(){
     host=$(get_kube_secret "mev-inspect-db-credentials" "host")
     username=$(get_kube_secret "mev-inspect-db-credentials" "username")
     password=$(get_kube_secret "mev-inspect-db-credentials" "password")
-
+    echo "host $host"
+    echo "username $username"
+    echo "password $password"
     kubectl run -i --rm --tty postgres-client-$RANDOM \
         --env="PGPASSWORD=$password"  \
         --image=jbergknoff/postgresql-client \

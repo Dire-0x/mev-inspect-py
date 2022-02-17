@@ -30,7 +30,7 @@ TOKEN_ADDRESSES = [
     REN_TOKEN_ADDRESS,
     CUSDC_TOKEN_ADDRESS,
     CDAI_TOKEN_ADDRESS,
-    CETH_TOKEN_ADDRESS,
+    # CETH_TOKEN_ADDRESS,
     CWBTC_TOKEN_ADDRESS,
 ]
 
@@ -47,7 +47,7 @@ COINGECKO_ID_BY_ADDRESS = {
     REN_TOKEN_ADDRESS: "republic-protocol",
     CUSDC_TOKEN_ADDRESS: "compound-usd-coin",
     CDAI_TOKEN_ADDRESS: "cdai",
-    CETH_TOKEN_ADDRESS: "compound-ether",
+    # CETH_TOKEN_ADDRESS: "compound-ether",
     CWBTC_TOKEN_ADDRESS: "compound-wrapped-btc",
 }
 

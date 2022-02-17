@@ -70,7 +70,7 @@ k8s_yaml(helm(
         "extraEnv[2].value=us-east-1",
         "extraEnv[3].name=AWS_ENDPOINT_URL",
         "extraEnv[3].value=http://localstack:4566",
-        "replicaCount=1",
+        "replicaCount=3",
     ],
 ))
 
