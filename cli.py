@@ -156,10 +156,10 @@ def fetch_all_prices():
     inspect_db_session = get_inspect_session()
 
     logger.info("Fetching prices")
-    prices = fetch_prices()
+    prices = fetch_prices(inspect_db_session)
 
-    logger.info("Writing prices")
-    write_prices(inspect_db_session, prices)
+    logger.info("Done Writing prices")
+    # write_prices(inspect_db_session, prices)
 
 @cli.command()
 def fetch_all_tokens():

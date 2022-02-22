@@ -3,12 +3,12 @@ from typing import List
 import time
 
 from pycoingecko import CoinGeckoAPI
-
+from mev_inspect.crud.prices import write_prices
 from mev_inspect.schemas.prices import COINGECKO_ID_BY_ADDRESS, TOKEN_ADDRESSES, Price
 import logging
 logger = logging.getLogger(__name__)
 
-def fetch_prices() -> List[Price]:
+def fetch_prices(db_session) -> List[Price]:
     coingecko_api = CoinGeckoAPI()
     prices = []
 
@@ -20,8 +20,12 @@ def fetch_prices() -> List[Price]:
             days="max",
             interval="daily",
         )
-        prices += _build_token_prices(coingecko_price_data, token_address)
-        time.sleep(1.5)
+        price = _build_token_prices(coingecko_price_data, token_address)
+        if db_session:
+            write_prices(db_session, price)
+            logger.info(f"saved price data for: {token_address}")
+        prices += price
+        time.sleep(1.2)
     return prices
 
 
