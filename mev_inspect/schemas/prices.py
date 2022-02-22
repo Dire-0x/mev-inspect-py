@@ -1,7 +1,9 @@
+import json
+from pathlib import Path
 from datetime import datetime
-
 from pydantic import BaseModel, validator
-
+import logging
+logger = logging.getLogger(__name__)
 ETH_TOKEN_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
 WETH_TOKEN_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
 WBTC_TOKEN_ADDRESS = "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
@@ -30,7 +32,7 @@ TOKEN_ADDRESSES = [
     REN_TOKEN_ADDRESS,
     CUSDC_TOKEN_ADDRESS,
     CDAI_TOKEN_ADDRESS,
-    # CETH_TOKEN_ADDRESS,
+    CETH_TOKEN_ADDRESS,
     CWBTC_TOKEN_ADDRESS,
 ]
 
@@ -47,9 +49,26 @@ COINGECKO_ID_BY_ADDRESS = {
     REN_TOKEN_ADDRESS: "republic-protocol",
     CUSDC_TOKEN_ADDRESS: "compound-usd-coin",
     CDAI_TOKEN_ADDRESS: "cdai",
-    # CETH_TOKEN_ADDRESS: "compound-ether",
+    CETH_TOKEN_ADDRESS: "compound-ether",
     CWBTC_TOKEN_ADDRESS: "compound-wrapped-btc",
 }
+
+THIS_FILE_DIRECTORY = Path(__file__).parents[1]
+COINGECKO_LIST_FILE_PATH = THIS_FILE_DIRECTORY / "tokens" / "coingecko-list.json"
+f = open(COINGECKO_LIST_FILE_PATH)
+COINGECKO_LIST = json.load(f)
+for data in COINGECKO_LIST:
+    try:
+        platforms = data["platforms"]
+        if platforms:
+            ethereum = platforms["ethereum"]
+            if ethereum:
+                TOKEN_ADDRESSES.append(ethereum)
+                COINGECKO_ID_BY_ADDRESS[ethereum] = data["id"]
+    except:
+        logger.info("key error in coingecko list")
+    
+
 
 
 class Price(BaseModel):

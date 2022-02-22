@@ -9,9 +9,11 @@ import dramatiq
 
 from mev_inspect.concurrency import coro
 from mev_inspect.crud.prices import write_prices
+from mev_inspect.crud.tokens import write_tokens
 from mev_inspect.db import get_inspect_session, get_trace_session
 from mev_inspect.inspector import MEVInspector
 from mev_inspect.prices import fetch_prices, fetch_prices_range
+from mev_inspect.tokens import fetch_tokens
 from mev_inspect.queue.broker import connect_broker
 from mev_inspect.queue.tasks import (
     LOW_PRIORITY,
@@ -159,6 +161,15 @@ def fetch_all_prices():
     logger.info("Writing prices")
     write_prices(inspect_db_session, prices)
 
+@cli.command()
+def fetch_all_tokens():
+    inspect_db_session = get_inspect_session()
+
+    logger.info("Fetching tokens")
+    tokens = fetch_tokens()
+    
+    logger.info("Writing tokens")
+    write_tokens(inspect_db_session, tokens)
 
 @cli.command()
 @click.argument("block_number", type=int)

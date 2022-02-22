@@ -1,16 +1,19 @@
 from datetime import datetime
 from typing import List
+import time
 
 from pycoingecko import CoinGeckoAPI
 
 from mev_inspect.schemas.prices import COINGECKO_ID_BY_ADDRESS, TOKEN_ADDRESSES, Price
-
+import logging
+logger = logging.getLogger(__name__)
 
 def fetch_prices() -> List[Price]:
     coingecko_api = CoinGeckoAPI()
     prices = []
 
     for token_address in TOKEN_ADDRESSES:
+        logger.info(f"Get Price Data for: {token_address}")
         coingecko_price_data = coingecko_api.get_coin_market_chart_by_id(
             id=COINGECKO_ID_BY_ADDRESS[token_address],
             vs_currency="usd",
@@ -18,7 +21,7 @@ def fetch_prices() -> List[Price]:
             interval="daily",
         )
         prices += _build_token_prices(coingecko_price_data, token_address)
-
+        time.sleep(1.5)
     return prices
 
 

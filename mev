@@ -107,6 +107,16 @@ case "$1" in
         echo "Sending $after_block to $before_block export to queue"
         kubectl exec -ti deploy/mev-inspect -- poetry run enqueue-many-s3-exports $after_block $before_block
   ;;
+  tokens)
+        shift
+        case "$1" in
+          fetch-all)
+                echo "Running tokens fetch-all"
+                kubectl exec -ti deploy/mev-inspect -- \
+                    poetry run fetch-all-tokens
+            ;;
+        esac
+  ;;
   enqueue-s3-export)
         block_number=$2
 
