@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: {{ include "mev-inspect-prices.fullname" . }}
 spec:
-  schedule: "0 */1 * * *"
+  schedule: "0 */6 * * *"
   successfulJobsHistoryLimit: 0
   jobTemplate:
     spec:
