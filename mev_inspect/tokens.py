@@ -1,9 +1,9 @@
-from typing import List
+from typing import List, Dict
 import json
 from pathlib import Path
 import os
-
 from web3 import Web3, HTTPProvider
+from mev_inspect.crud.tokens import get_tokens
 from mev_inspect.schemas.prices import TOKEN_ADDRESSES
 from mev_inspect.schemas.tokens import Token
 import logging
@@ -26,7 +26,12 @@ def fetch_tokens() -> List[Token]:
           logger.info(f"Token & Decimals: {token_address} {decimals}")
           tokens.append(Token(token_address=token_address, decimals=decimals))
         except:
-          logger.info('exeption thrown getting token decimals')
-          
+          logger.info('exeption thrown getting token decimals')  
     return tokens
 
+def get_tokens_map(db_session) -> Dict[str, Token]:
+    tokensMap = {}
+    tokens = get_tokens(db_session)
+    for token in tokens:
+        tokensMap[token.token_address] = token
+    return tokensMap
