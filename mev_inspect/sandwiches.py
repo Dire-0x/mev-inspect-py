@@ -76,12 +76,11 @@ def _get_sandwich_starting_with_swap(
 
     return None
 
-def update_sandwich_profit_usd(db_session) -> None:
+def update_sandwich_profit_usd(db_session, query:str = 'profit_amount_usd IS NULL') -> None:
     logger.info("start update sandwich profit usd")
 
     allTokens = get_tokens_map(db_session)
 
-    query = 'profit_amount_usd IS NULL'
     limit = 100
     skip = 0
     count = count_sandwiches(db_session, query=query)
