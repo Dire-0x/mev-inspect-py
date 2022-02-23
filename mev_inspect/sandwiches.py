@@ -116,16 +116,19 @@ def update_sandwich_profit_usd(db_session) -> None:
         for sandwich in sandwiches:
             try:
                 tokenAddress = sandwich.profit_token_address
-                token = allTokens[tokenAddress]
                 blockNumber = int(sandwich.block_number)
-                block = blocks[blockNumber]
-                tokenPrices = prices[tokenAddress]
-                price = get_closest_price(block.block_timestamp, tokenPrices)
-                model = SandwichModel(**sandwich)
-                model.profit_amount_decimal = round(sandwich.profit_amount / Decimal(10 ** token.decimals), 6)
-                model.profit_amount_usd = round(model.profit_amount_decimal * price.usd_price, 6)
-                sandwichUpdates.append(model)
-                updated+=1
+                token = allTokens[tokenAddress] if tokenAddress in allTokens else None
+                block = blocks[blockNumber] if blockNumber in blocks else None
+                tokenPrices = prices[tokenAddress] if tokenAddress in prices else None
+                if token is not None and block is not None and tokenPrices is not None:
+                    price = get_closest_price(block.block_timestamp, tokenPrices)
+                    model = SandwichModel(**sandwich)
+                    model.profit_amount_decimal = round(sandwich.profit_amount / Decimal(10 ** token.decimals), 6)
+                    model.profit_amount_usd = round(model.profit_amount_decimal * price.usd_price, 6)
+                    sandwichUpdates.append(model)
+                    updated+=1
+                else:
+                    skip+=1
             except:
                 skip+=1
                 exc_type, exc_value, exc_traceback = sys.exc_info()
