@@ -80,7 +80,7 @@ def update_sandwich_profit_usd(db_session) -> None:
     allTokens = get_tokens_map(db_session)
 
     query = 'profit_amount_usd IS NULL'
-    limit = 5
+    limit = 100
     skip = 0
     count = count_sandwiches(db_session, query=query)
     updated = 0
