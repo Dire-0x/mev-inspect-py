@@ -7,6 +7,8 @@ from mev_inspect.crud.sandwiches import fetch_sandwiches, count_sandwiches, upda
 from mev_inspect.block import get_blocks_map
 from mev_inspect.prices import get_prices_map, get_closest_price
 from mev_inspect.tokens import get_tokens_map
+import sys
+import traceback
 import logging
 logger = logging.getLogger(__name__)
 
@@ -126,7 +128,9 @@ def update_sandwich_profit_usd(db_session) -> None:
                 updated+=1
             except:
                 skip+=1
-                logger.info(f"Exeption thrown while calculating profit amounts")
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+                logger.exception(''.join('!! ' + line for line in lines))
 
         if len(sandwichUpdates) > 0:
             update_sandwiches(db_session, sandwiches=sandwichUpdates)
