@@ -14,6 +14,7 @@ ERC20_ABI_FILE_PATH = THIS_FILE_DIRECTORY / "abis" / "ERC20.json"
 f = open(ERC20_ABI_FILE_PATH)
 ERC20_ABI = json.load(f)
 
+TOKENS_MAP=None
 def fetch_tokens() -> List[Token]:
     base_provider = HTTPProvider(os.environ["RPC_URL"])
     w3 = Web3(base_provider)
@@ -30,8 +31,13 @@ def fetch_tokens() -> List[Token]:
     return tokens
 
 def get_tokens_map(db_session) -> Dict[str, Token]:
+    global TOKENS_MAP
+    if TOKENS_MAP:
+        logger.info(f"Tokens Map from Cache: {TOKENS_MAP}")
+        return TOKENS_MAP
     tokensMap = {}
     tokens = get_tokens(db_session)
     for token in tokens:
         tokensMap[token.token_address] = token
-    return tokensMap
+    TOKENS_MAP = tokensMap
+    return TOKENS_MAP

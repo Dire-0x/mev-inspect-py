@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Dict
 from uuid import uuid4
-
+from sqlalchemy import orm, update
+from sqlalchemy.sql.expression import bindparam
 from mev_inspect.models.sandwiches import SandwichModel
 from mev_inspect.schemas.sandwiches import Sandwich
 
@@ -8,7 +9,7 @@ from .shared import delete_by_block_range
 
 
 def delete_sandwiches_for_blocks(
-    db_session,
+    db_session: orm.Session,
     after_block_number: int,
     before_block_number: int,
 ) -> None:
@@ -22,7 +23,7 @@ def delete_sandwiches_for_blocks(
 
 
 def write_sandwiches(
-    db_session,
+    db_session: orm.Session,
     sandwiches: List[Sandwich],
 ) -> None:
     sandwich_models = []
@@ -41,6 +42,8 @@ def write_sandwiches(
                 backrun_swap_trace_address=sandwich.backrun_swap.trace_address,
                 profit_token_address=sandwich.profit_token_address,
                 profit_amount=sandwich.profit_amount,
+                profit_amount_decimal=sandwich.profit_amount_decimal,
+                profit_amount_usd=sandwich.profit_amount_usd
             )
         )
 
@@ -67,3 +70,30 @@ def write_sandwiches(
         )
 
         db_session.commit()
+
+def update_sandwiches(
+    db_session: orm.Session,
+    sandwiches: List[SandwichModel],
+) -> None:
+    if len(sandwiches) > 0:
+        data = []
+        for sandwich in sandwiches:
+            data.append(sandwich.__dict__)
+        db_session.bulk_update_mappings(SandwichModel, data)
+        db_session.commit()
+
+def fetch_sandwiches(
+    db_session: orm.Session, 
+    query: str, 
+    offset: int, 
+    limit: int
+) -> List[Sandwich]:
+    sandwiches = db_session.execute(f"SELECT * FROM sandwiches WHERE {query} LIMIT {limit} OFFSET {offset}").all()
+    return sandwiches
+
+def count_sandwiches(
+    db_session: orm.Session, 
+    query: str, 
+) -> int:
+    sandwiches = db_session.execute(f"SELECT COUNT(*) AS count_1 FROM sandwiches WHERE {query}").scalar()
+    return sandwiches

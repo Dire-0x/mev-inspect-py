@@ -117,6 +117,16 @@ case "$1" in
             ;;
         esac
   ;;
+  sandwiches)
+        shift
+        case "$1" in
+          populate-profit)
+                echo "Running sandwiches populate-profit"
+                kubectl exec -ti deploy/mev-inspect -- \
+                    poetry run populate-sandwich-usd-profit
+            ;;
+        esac
+  ;;
   enqueue-s3-export)
         block_number=$2
 

@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List
-
+from sqlalchemy import orm
 from mev_inspect.db import write_as_csv
 from mev_inspect.schemas.blocks import Block
 
@@ -37,3 +37,14 @@ def write_blocks(
         for block in blocks
     )
     write_as_csv(db_session, "blocks", items_generator)
+
+def get_blocks(db_session: orm.Session, blocks: List[int]) -> List[Block]:
+    if len(blocks) < 1:
+        return []
+    filterString = f"IN {tuple(blocks)}"
+    if len(blocks) <= 1:
+        filterString = f"= '{blocks[0]}'"
+    result = db_session.execute(
+        f"SELECT * FROM blocks WHERE block_number {filterString}"
+    ).all()
+    return result

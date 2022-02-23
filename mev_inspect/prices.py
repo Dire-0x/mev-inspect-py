@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import List
+from typing import List, Dict
 import time
 
 from pycoingecko import CoinGeckoAPI
-from mev_inspect.crud.prices import write_prices
+from mev_inspect.crud.prices import write_prices, get_prices
 from mev_inspect.schemas.prices import COINGECKO_ID_BY_ADDRESS, TOKEN_ADDRESSES, Price
 import logging
 logger = logging.getLogger(__name__)
@@ -59,3 +59,15 @@ def _build_token_prices(coingecko_price_data, token_address) -> List[Price]:
             )
         )
     return prices
+
+def get_prices_map(db_session, tokens: List[str]) -> Dict[str, List[Price]]:
+    pricesMap: Dict[str, List[Price]] = {}
+    prices = get_prices(db_session, tokens)
+    for price in prices:
+        if price.token_address not in pricesMap.keys():
+            pricesMap[price.token_address] = []
+        pricesMap[price.token_address].append(price)
+    return pricesMap
+
+def get_closest_price(timestamp: int, prices: List[Price]) -> Price:
+    return prices[min(range(len(prices)), key = lambda i: abs(prices[i].timestamp-timestamp))]
