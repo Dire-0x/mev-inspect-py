@@ -13,6 +13,7 @@ class Sandwich(BaseModel):
     backrun_swap: Swap
     sandwiched_swaps: List[Swap]
     profit_token_address: str
+    profit2_token_address: Optional[str]
     profit_amount: int
     profit_amount_decimal: Optional[float]
     profit_amount_usd: Optional[float]

@@ -21,7 +21,7 @@ docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$now |
 # update the helm deployments
 helm upgrade mev-inspect k8s/mev-inspect --set=image.repository=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$now
 helm upgrade mev-inspect-prices k8s/mev-inspect-prices --set=image.repository=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$now
-helm upgrade mev-inspect-workers k8s/mev-inspect-workers --set=image.repository=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$now --set=replicaCount=16
+helm upgrade mev-inspect-workers k8s/mev-inspect-workers --set=image.repository=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$now --set=replicaCount=24
 
 #  first deployment
 # helm repo add bitnami https://charts.bitnami.com/bitnami

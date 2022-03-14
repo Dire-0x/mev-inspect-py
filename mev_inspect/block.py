@@ -1,16 +1,17 @@
 import asyncio
 import logging
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 from sqlalchemy import orm
 from web3 import Web3
 
+from mev_inspect.crud.blocks import get_blocks
 from mev_inspect.fees import fetch_base_fee_per_gas
+from mev_inspect.models.blocks import BlockModel
 from mev_inspect.schemas.blocks import Block
 from mev_inspect.schemas.receipts import Receipt
 from mev_inspect.schemas.traces import Trace, TraceType
 from mev_inspect.utils import hex_to_int
-from mev_inspect.crud.blocks import get_blocks
 
 logger = logging.getLogger(__name__)
 
@@ -202,8 +203,9 @@ def get_transaction_hashes(calls: List[Trace]) -> List[str]:
 
     return result
 
-def get_blocks_map(db_session, blocks: List[int]) -> Dict[str, Block]:
-    map: Dict[str, Block] = {}
+
+def get_blocks_map(db_session, blocks: List[int]) -> Dict[int, BlockModel]:
+    map: Dict[int, BlockModel] = {}
     result = get_blocks(db_session, blocks)
     for block in result:
         blockNumber = block.block_number

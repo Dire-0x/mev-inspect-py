@@ -1,8 +1,10 @@
 import json
-from pathlib import Path
-from datetime import datetime
-from pydantic import BaseModel, validator
 import logging
+from datetime import datetime
+from pathlib import Path
+
+from pydantic import BaseModel, validator
+
 logger = logging.getLogger(__name__)
 ETH_TOKEN_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
 WETH_TOKEN_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
@@ -67,8 +69,6 @@ for data in COINGECKO_LIST:
                 COINGECKO_ID_BY_ADDRESS[ethereum] = data["id"]
     except:
         logger.info("key error in coingecko list")
-    
-
 
 
 class Price(BaseModel):

@@ -7,6 +7,7 @@ class SwapModel(Base):
     __tablename__ = "swaps"
 
     abi_name = Column(String, nullable=False)
+    transaction_eoa = Column(String, nullable=True)
     transaction_hash = Column(String, primary_key=True)
     transaction_position = Column(Numeric, nullable=True)
     block_number = Column(Numeric, nullable=False)

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, validator
 
+
 class Token(BaseModel):
     token_address: str
     decimals: int

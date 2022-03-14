@@ -1,10 +1,18 @@
+import logging
 from typing import List, Optional, Sequence
 
+from eth_abi.packed import encode_abi_packed
+from eth_utils import to_checksum_address
+from web3 import Web3
+
+from mev_inspect.constants.uniswap import SUSHISWAP_INIT_HASH, SUSHISWAP_POOL_FACTORY
 from mev_inspect.schemas.nft_trades import NftTrade
 from mev_inspect.schemas.prices import ETH_TOKEN_ADDRESS
 from mev_inspect.schemas.swaps import Swap
-from mev_inspect.schemas.traces import ClassifiedTrace, DecodedCallTrace
+from mev_inspect.schemas.traces import ClassifiedTrace, DecodedCallTrace, Protocol
 from mev_inspect.schemas.transfers import Transfer
+
+logger = logging.getLogger(__name__)
 
 
 def create_nft_trade_from_transfers(
@@ -68,6 +76,7 @@ def create_swap_from_pool_transfers(
     prior_transfers: List[Transfer],
     child_transfers: List[Transfer],
 ) -> Optional[Swap]:
+
     pool_address = trace.to_address
 
     transfers_to_pool = []
@@ -94,6 +103,18 @@ def create_swap_from_pool_transfers(
     transfer_in = transfers_to_pool[-1]
     transfer_out = transfers_from_pool_to_recipient[0]
 
+    protocol = trace.protocol
+
+    is_sushiswap = test_pool_create2(
+        to_checksum_address(SUSHISWAP_POOL_FACTORY),
+        to_checksum_address(transfer_in.token_address),
+        to_checksum_address(transfer_out.token_address),
+        SUSHISWAP_INIT_HASH,
+        to_checksum_address(transfer_in.to_address),
+    )
+    if is_sushiswap:
+        protocol = Protocol.sushiswap
+
     return Swap(
         abi_name=trace.abi_name,
         transaction_hash=trace.transaction_hash,
@@ -101,7 +122,7 @@ def create_swap_from_pool_transfers(
         block_number=trace.block_number,
         trace_address=trace.trace_address,
         contract_address=pool_address,
-        protocol=trace.protocol,
+        protocol=protocol,
         from_address=transfer_in.from_address,
         to_address=transfer_out.to_address,
         token_in_address=transfer_in.token_address,
@@ -203,3 +224,17 @@ def get_debt_transfer(
             return transfer
 
     return None
+
+
+def test_pool_create2(factory, token1, token2, init_code, expected_address) -> bool:
+    tokens = [token1, token2]
+    tokens.sort()
+    pre = "0xff"
+    abiEncoded_1 = encode_abi_packed(["address", "address"], tokens)
+    salt_ = Web3.solidityKeccak(["bytes"], ["0x" + abiEncoded_1.hex()])
+    abiEncoded_2 = encode_abi_packed(["address", "bytes32"], (factory, salt_))
+    result = Web3.solidityKeccak(
+        ["bytes", "bytes"], [pre + abiEncoded_2.hex(), init_code]
+    )[12:]
+    result_address = to_checksum_address(result.hex())
+    return result_address == expected_address

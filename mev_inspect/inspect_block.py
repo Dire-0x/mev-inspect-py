@@ -9,6 +9,7 @@ from mev_inspect.block import create_from_block_number
 from mev_inspect.classifiers.trace import TraceClassifier
 from mev_inspect.crud.arbitrages import delete_arbitrages_for_blocks, write_arbitrages
 from mev_inspect.crud.blocks import delete_blocks, write_blocks
+from mev_inspect.crud.ens import write_ens
 from mev_inspect.crud.liquidations import (
     delete_liquidations_for_blocks,
     write_liquidations,
@@ -34,6 +35,7 @@ from mev_inspect.crud.traces import (
     write_classified_traces,
 )
 from mev_inspect.crud.transfers import delete_transfers_for_blocks, write_transfers
+from mev_inspect.ens import get_ens_from_sandwiches
 from mev_inspect.liquidations import get_liquidations
 from mev_inspect.miner_payments import get_miner_payments
 from mev_inspect.nft_trades import get_nft_trades
@@ -41,6 +43,7 @@ from mev_inspect.punks import get_punk_bid_acceptances, get_punk_bids, get_punk_
 from mev_inspect.sandwiches import get_sandwiches
 from mev_inspect.schemas.arbitrages import Arbitrage
 from mev_inspect.schemas.blocks import Block
+from mev_inspect.schemas.ens import Ens
 from mev_inspect.schemas.liquidations import Liquidation
 from mev_inspect.schemas.miner_payments import MinerPayment
 from mev_inspect.schemas.nft_trades import NftTrade
@@ -92,6 +95,7 @@ async def inspect_many_blocks(
     all_arbitrages: List[Arbitrage] = []
     all_liquidations: List[Liquidation] = []
     all_sandwiches: List[Sandwich] = []
+    all_ens: List[Ens] = []
 
     all_punk_bids: List[PunkBid] = []
     all_punk_bid_acceptances: List[PunkBidAcceptance] = []
@@ -138,8 +142,11 @@ async def inspect_many_blocks(
         liquidations = get_liquidations(classified_traces)
         logger.info(f"Block: {block_number} -- Found {len(liquidations)} liquidations")
 
-        sandwiches = get_sandwiches(swaps)
+        sandwiches = get_sandwiches(swaps, inspect_db_session)
         logger.info(f"Block: {block_number} -- Found {len(sandwiches)} sandwiches")
+
+        ens = get_ens_from_sandwiches(sandwiches, inspect_db_session)
+        logger.info(f"Block: {block_number} -- Found {len(ens)} ens")
 
         punk_bids = get_punk_bids(classified_traces)
         punk_bid_acceptances = get_punk_bid_acceptances(classified_traces)
@@ -160,6 +167,7 @@ async def inspect_many_blocks(
         all_arbitrages.extend(arbitrages)
         all_liquidations.extend(liquidations)
         all_sandwiches.extend(sandwiches)
+        all_ens.extend(ens)
 
         all_punk_bids.extend(punk_bids)
         all_punk_bid_acceptances.extend(punk_bid_acceptances)
@@ -201,6 +209,8 @@ async def inspect_many_blocks(
         inspect_db_session, after_block_number, before_block_number
     )
     write_sandwiches(inspect_db_session, all_sandwiches)
+
+    write_ens(inspect_db_session, all_ens)
 
     delete_punk_bids_for_blocks(
         inspect_db_session, after_block_number, before_block_number

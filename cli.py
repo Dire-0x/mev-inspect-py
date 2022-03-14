@@ -13,8 +13,6 @@ from mev_inspect.crud.tokens import write_tokens
 from mev_inspect.db import get_inspect_session, get_trace_session
 from mev_inspect.inspector import MEVInspector
 from mev_inspect.prices import fetch_prices, fetch_prices_range
-from mev_inspect.tokens import fetch_tokens, get_tokens_map
-from mev_inspect.sandwiches import update_sandwich_profit_usd
 from mev_inspect.queue.broker import connect_broker
 from mev_inspect.queue.tasks import (
     LOW_PRIORITY,
@@ -23,6 +21,8 @@ from mev_inspect.queue.tasks import (
     inspect_many_blocks_task,
 )
 from mev_inspect.s3_export import export_block
+from mev_inspect.sandwiches import update_sandwich_profit_usd
+from mev_inspect.tokens import fetch_tokens
 
 RPC_URL_ENV = "RPC_URL"
 
@@ -157,9 +157,10 @@ def fetch_all_prices():
     inspect_db_session = get_inspect_session()
 
     logger.info("Fetching prices")
-    prices = fetch_prices(inspect_db_session)
+    fetch_prices(inspect_db_session)
 
     logger.info("Done Writing prices")
+
 
 @cli.command()
 def populate_sandwich_usd_profit():
@@ -169,15 +170,17 @@ def populate_sandwich_usd_profit():
     update_sandwich_profit_usd(inspect_db_session)
     logger.info("Done Populating Sandwich USD Profits")
 
+
 @cli.command()
 def fetch_all_tokens():
     inspect_db_session = get_inspect_session()
 
     logger.info("Fetching tokens")
     tokens = fetch_tokens()
-    
+
     logger.info("Writing tokens")
     write_tokens(inspect_db_session, tokens)
+
 
 @cli.command()
 @click.argument("block_number", type=int)

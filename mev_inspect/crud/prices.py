@@ -1,4 +1,5 @@
 from typing import List
+
 from sqlalchemy import orm
 from sqlalchemy.dialects.postgresql import insert
 
@@ -15,6 +16,7 @@ def write_prices(db_session: orm.Session, prices: List[Price]) -> None:
 
     db_session.execute(insert_statement)
     db_session.commit()
+
 
 def get_prices(db_session: orm.Session, tokens: List[str]) -> List[Price]:
     filterString = f"IN {tuple(tokens)}"

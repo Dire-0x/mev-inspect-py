@@ -1,3 +1,4 @@
+import logging
 from typing import List, Optional
 
 from mev_inspect.classifiers.specs import get_classifier
@@ -11,6 +12,8 @@ from mev_inspect.transfers import (
     get_transfer,
     remove_child_transfers_of_transfers,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def get_swaps(traces: List[ClassifiedTrace]) -> List[Swap]:
@@ -27,8 +30,13 @@ def _get_swaps_for_transaction(traces: List[ClassifiedTrace]) -> List[Swap]:
 
     swaps: List[Swap] = []
     prior_transfers: List[Transfer] = []
-
+    last_seen_tx_hash = None
+    tx_eoa = None
     for trace in ordered_traces:
+        if last_seen_tx_hash != trace.transaction_hash:
+            last_seen_tx_hash = trace.transaction_hash
+            tx_eoa = trace.from_address
+
         if not isinstance(trace, DecodedCallTrace):
             continue
 
@@ -51,6 +59,7 @@ def _get_swaps_for_transaction(traces: List[ClassifiedTrace]) -> List[Swap]:
             )
 
             if swap is not None:
+                swap.transaction_eoa = tx_eoa
                 swaps.append(swap)
 
     return swaps
